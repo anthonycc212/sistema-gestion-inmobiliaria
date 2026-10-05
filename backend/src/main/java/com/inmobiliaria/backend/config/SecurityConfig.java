@@ -95,7 +95,18 @@ public class SecurityConfig {
                         // Rutas públicas
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/api/public/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/distritos/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/caracteristicas/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/propiedades/**").permitAll()
                         // Rutas protegidas por RBAC
+                        .requestMatchers(HttpMethod.POST, "/api/distritos/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/api/caracteristicas/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/api/caracteristicas/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/api/propiedades/*/imagenes/**").hasAnyRole("ADMIN", "AGENTE")
+                        .requestMatchers(HttpMethod.DELETE, "/api/propiedades/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/api/propiedades/**").hasAnyRole("ADMIN", "AGENTE")
+                        .requestMatchers(HttpMethod.PUT, "/api/propiedades/**").hasAnyRole("ADMIN", "AGENTE")
+                        .requestMatchers(HttpMethod.PATCH, "/api/propiedades/**").hasAnyRole("ADMIN", "AGENTE")
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         .requestMatchers("/api/agente/**").hasAnyRole("ADMIN", "AGENTE")
                         // Cualquier otra petición debe estar autenticada

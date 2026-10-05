@@ -53,3 +53,5 @@ export async function apiRequest(endpoint, options = {}) {
 
   return data;
 }
+
+export default apiRequest;

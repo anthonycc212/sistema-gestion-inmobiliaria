@@ -1,19 +1,19 @@
 import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
-import { getPropertyById } from "../data/properties";
-import { getUsuariosMock } from "../auth/mockUsers";
+import { getPropiedadById } from "../services/propiedadesService";
 import { getContactosMock, setContactosMock } from "../data/contactos";
 import "./PropertyDetail.css";
 
-const formatPrice = (price, moneda, operacion) => {
-  const f = price.toLocaleString("en-US");
+const formatPrice = (price, moneda = "USD", operacion = "Venta") => {
+  const f = Number(price || 0).toLocaleString("en-US");
   const suffix = operacion === "Alquiler" ? " / mes" : "";
   return `${moneda === "USD" ? "US$" : "S/"} ${f}${suffix}`;
 };
 
 export default function PropertyDetail() {
   const { id } = useParams();
-  const property = getPropertyById(id);
+  const [property, setProperty] = useState(null);
+  const [loading, setLoading] = useState(true);
   const [activeImg, setActiveImg] = useState(0);
   const [modalType, setModalType] = useState(null);
   const [form, setForm] = useState({ nombre: "", email: "", telefono: "", mensaje: "", fecha: "" });
@@ -23,6 +23,19 @@ export default function PropertyDetail() {
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "smooth" });
     setActiveImg(0);
+    setLoading(true);
+
+    getPropiedadById(id)
+      .then((data) => {
+        setProperty(data || null);
+      })
+      .catch((err) => {
+        console.error("Error al obtener detalle de propiedad:", err);
+        setProperty(null);
+      })
+      .finally(() => {
+        setLoading(false);
+      });
   }, [id]);
 
   const handleOpenModal = (type) => {
@@ -49,7 +62,7 @@ export default function PropertyDetail() {
       setErrors(errs);
       return;
     }
-    // MOCK SUBMIT
+    // Registro de contacto / visita
     const currentContacts = getContactosMock();
     const registro = {
       id: Date.now(),
@@ -61,7 +74,7 @@ export default function PropertyDetail() {
       propiedad: propertyTitle,
       propiedad_id: property.id,
       agente: agentName,
-      agente_id: property.agente_id,
+      agente_id: property.agente_id || property.agente?.id,
       origen: modalType === 'contact' ? "Contacto desde propiedad" : "Solicitud de visita",
       tipo: modalType === 'contact' ? "Contacto desde propiedad" : "Solicitud de visita",
       fecha: new Date().toISOString(),
@@ -71,9 +84,18 @@ export default function PropertyDetail() {
     
     const newList = [registro, ...currentContacts];
     setContactosMock(newList);
-    console.log("✅ Registro guardado en MOCK (Propiedad):", registro);
     setSubmitted(true);
   };
+
+  if (loading && !property) {
+    return (
+      <div className="detail-page" style={{ padding: "80px 0", textAlign: "center" }}>
+        <div className="container">
+          <p>Cargando detalles de la propiedad...</p>
+        </div>
+      </div>
+    );
+  }
 
   if (!property) {
     return (
@@ -81,7 +103,7 @@ export default function PropertyDetail() {
         <div className="not-found">
           <h2>404</h2>
           <h3>Propiedad no encontrada</h3>
-          <p>La propiedad que buscas no existe o fue eliminada.</p>
+          <p>La propiedad que buscas no existe o fue desactivada.</p>
           <Link to="/propiedades" className="btn btn-primary">
             Ver propiedades
           </Link>
@@ -90,38 +112,58 @@ export default function PropertyDetail() {
     );
   }
 
-  const agent = getUsuariosMock().find(u => String(u.id) === String(property.agente_id));
+  const agent = property.agente || null;
   const {
-    titulo, operacion, tipo, ubicacion,
+    titulo, operacion, tipo,
     precio, moneda, dormitorios, banos,
     area_construida, area_total,
     descripcion, caracteristicas, imagenes,
+    imagenesUrls, imagenPrincipal,
   } = property;
+
+  const cleanUbicacion = (() => {
+    let raw = property.ubicacion || property.direccion || "";
+    const distName = property.distrito?.nombre || "";
+    const provName = property.distrito?.provincia || "Lima";
+    if (distName) {
+      const suffix = `${distName}, ${provName}, Perú`;
+      while (raw.endsWith(suffix) && raw.indexOf(suffix) !== raw.lastIndexOf(suffix)) {
+        raw = raw.substring(0, raw.lastIndexOf(suffix)).replace(/[,\s]+$/, "");
+      }
+    }
+    return raw;
+  })();
+
+  const areaC = area_construida ?? property.areaConstruida;
+  const areaT = area_total ?? property.areaTotal;
+
+  const galleryImages = imagenesUrls?.length > 0
+    ? imagenesUrls
+    : (Array.isArray(imagenes) && imagenes.length > 0
+      ? imagenes.map(img => typeof img === 'string' ? img : img.url)
+      : [imagenPrincipal || "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=800&q=80"]);
 
   /* ── Ficha técnica: pares etiqueta/valor ── */
   const ficha = [
     { label: "Tipo", value: tipo },
     { label: "Operación", value: operacion },
     { label: "Precio", value: formatPrice(precio, moneda, operacion) },
-    area_total      && { label: "Área total",       value: `${area_total} m²` },
-    area_construida && { label: "Área construida",  value: `${area_construida} m²` },
-    dormitorios !== null && { label: "Dormitorios", value: dormitorios },
-    banos !== null  && { label: "Baños",            value: banos },
-    { label: "Ubicación", value: ubicacion },
+    areaT && { label: "Área total", value: `${areaT} m²` },
+    areaC && { label: "Área construida", value: `${areaC} m²` },
+    dormitorios !== null && dormitorios !== undefined && { label: "Dormitorios", value: dormitorios },
+    banos !== null && banos !== undefined && { label: "Baños", value: banos },
+    { label: "Ubicación", value: cleanUbicacion },
   ].filter(Boolean);
 
   /* ── Estadísticas rápidas (header) ── */
   const quickStats = [
-    area_total      && { lbl: "Terreno",      val: `${area_total} m²`,      icon: "⬛" },
-    area_construida && { lbl: "Construcción", val: `${area_construida} m²`, icon: "🏗" },
-    dormitorios !== null && { lbl: "Dormitorios", val: dormitorios,          icon: "🛏" },
-    banos !== null  && { lbl: "Baños",        val: banos,                    icon: "🚿" },
+    areaT && { lbl: "Terreno", val: `${areaT} m²`, icon: "⬛" },
+    areaC && { lbl: "Construcción", val: `${areaC} m²`, icon: "🏗" },
+    dormitorios !== null && dormitorios !== undefined && { lbl: "Dormitorios", val: dormitorios, icon: "🛏" },
+    banos !== null && banos !== undefined && { lbl: "Baños", val: banos, icon: "🚿" },
   ].filter(Boolean);
 
-  /* ── Botón ficha técnica (PDF futuro) ── */
   const handleFichaTecnica = () => {
-    // TODO: Implementar generación de PDF cuando exista el backend.
-    // Opciones: jsPDF, Puppeteer server-side, o endpoint /api/propiedades/:id/ficha
     alert("La descarga de la ficha técnica estará disponible próximamente.");
   };
 
@@ -145,7 +187,7 @@ export default function PropertyDetail() {
       <div className="detail-gallery">
         <div className="gallery-main">
           <img
-            src={imagenes[activeImg]}
+            src={galleryImages[activeImg] || galleryImages[0]}
             alt={`${titulo} - imagen ${activeImg + 1}`}
             onError={(e) => {
               e.target.src =
@@ -153,12 +195,12 @@ export default function PropertyDetail() {
             }}
           />
         </div>
-        {imagenes.length > 1 && (
+        {galleryImages.length > 1 && (
           <div className="gallery-thumbs">
-            {imagenes.map((img, i) => (
+            {galleryImages.map((img, i) => (
               <div
                 key={i}
-                className={`gallery-thumb${activeImg === i ? " active" : ""}`}
+                className={`gallery-thumb ${i === activeImg ? "active" : ""}`}
                 onClick={() => setActiveImg(i)}
               >
                 <img
@@ -166,7 +208,7 @@ export default function PropertyDetail() {
                   alt={`miniatura ${i + 1}`}
                   onError={(e) => {
                     e.target.src =
-                      "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=200&q=50";
+                      "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=200&q=60";
                   }}
                 />
               </div>
@@ -175,31 +217,27 @@ export default function PropertyDetail() {
         )}
       </div>
 
-      {/* ── Contenido principal ── */}
       <div className="container">
         <div className="detail-layout">
 
           {/* ════════════ COLUMNA IZQUIERDA ════════════ */}
           <div className="detail-main">
 
-            {/* ── 1. Encabezado de la propiedad ── */}
-            <div className="detail-card">
-              {/* Tipo operación + tipo inmueble + ID */}
-              <p className="detail-meta-line">
-                <span className={`badge badge-${operacion.toLowerCase()}`}>{operacion}</span>
-                <span className="detail-tipo-tag">{tipo}</span>
-              </p>
+            {/* ── 1. Encabezado principal ── */}
+            <div className="detail-header-block">
+              <div className="detail-badges">
+                <span className={`badge badge-${(operacion || 'venta').toLowerCase()}`}>
+                  {operacion}
+                </span>
+                <span className="badge badge-tipo">{tipo}</span>
+              </div>
 
-              {/* Precio prominente (como referencia: arriba) */}
+              <h1 className="detail-title">{titulo}</h1>
               <p className="detail-price">{formatPrice(precio, moneda, operacion)}</p>
 
-              {/* Título */}
-              <h1 className="detail-title">{titulo}</h1>
-
-              {/* Ubicación */}
               <p className="detail-location">
                 <span className="pin">📍</span>
-                {ubicacion}
+                {cleanUbicacion}
               </p>
 
               {/* ── 2. Stats rápidas ── */}
@@ -240,13 +278,15 @@ export default function PropertyDetail() {
                 <h2 className="detail-section-title">Características adicionales</h2>
                 <div className="detail-characteristics">
                   {caracteristicas.map((c, i) => (
-                    <div key={i} className="detail-char-item">{c}</div>
+                    <div key={i} className="detail-char-item">
+                      {typeof c === "object" ? c.nombre : c}
+                    </div>
                   ))}
                 </div>
               </div>
             )}
 
-            {/* ── 6. Ubicación / Mapa (sin modificar) ── */}
+            {/* ── 6. Ubicación / Mapa ── */}
             <div className="detail-card">
               <h2 className="detail-section-title">Ubicación</h2>
               <p className="detail-location" style={{ marginBottom: "16px", fontSize: "13px" }}>
@@ -266,7 +306,6 @@ export default function PropertyDetail() {
               >
                 📄 Descargar Ficha Técnica
               </button>
-              {/* TODO: Conectar con generación real de PDF en el backend */}
             </div>
 
           </div>{/* /detail-main */}

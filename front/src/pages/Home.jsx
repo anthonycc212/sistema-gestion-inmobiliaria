@@ -1,10 +1,11 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import PropertyCard from "../components/PropertyCard";
-import { getFeaturedProperties } from "../data/properties";
+import { getDistritos } from "../services/distritosService";
+import { getPropiedades } from "../services/propiedadesService";
 import "./Home.css";
 
-const DISTRITOS = [
+const DEFAULT_DISTRITOS = [
   "Todos",
   "La Molina",
   "Miraflores",
@@ -17,16 +18,50 @@ const DISTRITOS = [
 
 export default function Home() {
   const navigate = useNavigate();
-  const featured = getFeaturedProperties();
+  const [featured, setFeatured] = useState([]);
   const bgRef = useRef(null);
 
   // Search state
+  const [distritos, setDistritos] = useState(DEFAULT_DISTRITOS);
   const [search, setSearch] = useState({
     operacion: "",
     tipo: "",
     ubicacion: "",
     precio: "",
   });
+
+  useEffect(() => {
+    let isMounted = true;
+    getDistritos()
+      .then((data) => {
+        if (isMounted && Array.isArray(data) && data.length > 0) {
+          setDistritos(["Todos", ...data.map((d) => d.nombre)]);
+        }
+      })
+      .catch(() => {
+        // Maintain fallback DEFAULT_DISTRITOS
+      });
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    let isMounted = true;
+    getPropiedades({ destacada: true, size: 6, activo: true, estado: "Disponible" })
+      .then((data) => {
+        if (!isMounted) return;
+        const list = data?.content || (Array.isArray(data) ? data : []);
+        setFeatured(list);
+      })
+      .catch((err) => {
+        console.error("Error al cargar propiedades destacadas:", err);
+        if (isMounted) setFeatured([]);
+      });
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   // Animar el Hero BG sin doble-fetch: clase 'loaded' tras primer frame de pintura
   useEffect(() => {
@@ -113,7 +148,7 @@ export default function Home() {
                     setSearch({ ...search, ubicacion: e.target.value })
                   }
                 >
-                  {DISTRITOS.map((d) => (
+                  {distritos.map((d) => (
                     <option key={d} value={d === "Todos" ? "" : d}>
                       {d === "Todos" ? "Todas las ubicaciones" : d}
                     </option>
@@ -164,11 +199,20 @@ export default function Home() {
             </Link>
           </div>
 
-          <div className="featured-grid">
-            {featured.map((property) => (
-              <PropertyCard key={property.id} property={property} />
-            ))}
-          </div>
+          {featured.length === 0 ? (
+            <div style={{ textAlign: "center", padding: "48px 20px", color: "var(--color-text-muted, #718096)" }}>
+              <p style={{ fontSize: "16px", marginBottom: "16px" }}>No hay propiedades destacadas registradas actualmente.</p>
+              <Link to="/propiedades" className="btn btn-outline">
+                Ver catálogo de propiedades
+              </Link>
+            </div>
+          ) : (
+            <div className="featured-grid">
+              {featured.map((property) => (
+                <PropertyCard key={property.id} property={property} />
+              ))}
+            </div>
+          )}
         </div>
       </section>
 

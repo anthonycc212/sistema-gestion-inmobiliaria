@@ -1,8 +1,9 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { getDistritos } from "../services/distritosService";
 import "./Filters.css";
 
 const TIPOS = ["Casa", "Departamento", "Terreno", "Oficina", "Local Comercial"];
-const DISTRITOS = [
+const DEFAULT_DISTRITOS = [
   "Todas las ubicaciones",
   "La Molina",
   "Miraflores",
@@ -17,6 +18,19 @@ const DISTRITOS = [
 
 export default function Filters({ filters, onChange }) {
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [distritos, setDistritos] = useState(DEFAULT_DISTRITOS);
+
+  useEffect(() => {
+    getDistritos()
+      .then((data) => {
+        if (Array.isArray(data) && data.length > 0) {
+          const nombres = data.map((d) => d.nombre);
+          const unicos = ["Todas las ubicaciones", ...Array.from(new Set([...nombres, ...DEFAULT_DISTRITOS.slice(1)]))];
+          setDistritos(unicos);
+        }
+      })
+      .catch(() => {});
+  }, []);
 
   const handleOperacion = (val) => {
     onChange({ ...filters, operacion: val, page: 1 });
@@ -104,7 +118,7 @@ export default function Filters({ filters, onChange }) {
             value={filters.distrito || "Todas las ubicaciones"}
             onChange={handleDistrito}
           >
-            {DISTRITOS.map((d) => (
+            {distritos.map((d) => (
               <option key={d} value={d}>{d}</option>
             ))}
           </select>
