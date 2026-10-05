@@ -3,9 +3,7 @@ import { apiRequest } from "../services/apiClient";
 
 /**
  * src/auth/AuthContext.jsx
- *
- * Proveedor de autenticación REAL conectado a Spring Boot mediante JWT.
- * El token JWT se almacena bajo 'token' y se utiliza en las cabeceras Authorization: Bearer <token>.
+ * Contexto de autenticación y gestión de sesión con JWT.
  */
 
 const SESSION_KEY = "sesion_actual";
@@ -34,7 +32,6 @@ export function AuthProvider({ children }) {
         return { ok: false, error: "Respuesta de autenticación inválida" };
       }
 
-      // Almacenar el token JWT devuelto por Spring Security
       localStorage.setItem(TOKEN_KEY, data.token);
 
       const sesion = {

@@ -99,7 +99,7 @@ public class SecurityTests {
                 .andExpect(jsonPath("$.email").value(emailTest))
                 .andExpect(jsonPath("$.rol").value("AGENTE"));
 
-        // Verificar que la contraseña se guardó como BCrypt
+        // Verificar formato de hash de contraseña
         Usuario enBd = usuarioRepository.findByEmail(emailTest).orElseThrow();
         assertTrue(enBd.getPasswordHash().startsWith("$2a$10$"));
     }

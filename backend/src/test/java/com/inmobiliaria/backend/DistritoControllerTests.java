@@ -64,7 +64,6 @@ public class DistritoControllerTests {
     @Test
     @DisplayName("DISTRITOS 2: GET /api/distritos/{id} existente devuelve 200 OK con datos")
     void test2_obtenerPorIdExistente200() throws Exception {
-        // Asegurar que exista un distrito de prueba
         String testNombre = "San Isidro Test " + System.currentTimeMillis();
         UbicacionDistrito testDistrito = distritoRepository.save(new UbicacionDistrito(testNombre, "Lima", "Lima"));
         Thread.sleep(100); // Sincronización de réplica MySQL Master/Replica

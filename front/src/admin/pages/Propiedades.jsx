@@ -76,12 +76,10 @@ export default function Propiedades() {
   // Tab state (solo visible para ADMIN)
   const [activeTab, setActiveTab] = useState("propiedades"); // "propiedades" | "distritos" | "caracteristicas"
 
-  // Catálogos desde backend
   const [distritosList, setDistritosList] = useState([]);
   const [caracteristicasList, setCaracteristicasList] = useState([]);
   const [agentesList, setAgentesList] = useState([]);
 
-  // Estados de propiedades (conectado a backend)
   const [propiedades, setPropiedades] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
@@ -96,13 +94,11 @@ export default function Propiedades() {
   const [page, setPage] = useState(1);
   const PER_PAGE = 8;
 
-  // Estados para modal de distrito
   const [distritoModalOpen, setDistritoModalOpen] = useState(false);
   const [distritoForm, setDistritoForm] = useState(INITIAL_DISTRITO_FORM);
   const [distritoSaveError, setDistritoSaveError] = useState("");
   const [distritoSaving, setDistritoSaving] = useState(false);
 
-  // Estados para modal de característica
   const [caracModalOpen, setCaracModalOpen] = useState(false);
   const [caracForm, setCaracForm] = useState(INITIAL_CARAC_FORM);
   const [caracSaveError, setCaracSaveError] = useState("");
@@ -110,7 +106,7 @@ export default function Propiedades() {
   const [caracDeleting, setCaracDeleting] = useState(null);
   const [caracConfirmOpen, setCaracConfirmOpen] = useState(false);
 
-  // Carga inicial de datos desde backend
+  // Carga inicial de datos
   const cargarDatos = async () => {
     setLoading(true);
     try {
@@ -169,7 +165,6 @@ export default function Propiedades() {
   const totalPagesPropiedades = Math.max(1, Math.ceil(filteredPropiedades.length / PER_PAGE));
   const paginatedPropiedades = filteredPropiedades.slice((page - 1) * PER_PAGE, page * PER_PAGE);
 
-  // Filtrado de distritos
   const filteredDistritos = distritosList.filter((d) =>
     [d.nombre, d.provincia, d.departamento]
       .join(" ")
@@ -179,7 +174,6 @@ export default function Propiedades() {
   const totalPagesDistritos = Math.max(1, Math.ceil(filteredDistritos.length / PER_PAGE));
   const paginatedDistritos = filteredDistritos.slice((page - 1) * PER_PAGE, page * PER_PAGE);
 
-  // Filtrado de características
   const filteredCarac = caracteristicasList.filter((c) =>
     [c.nombre, c.categoria]
       .join(" ")

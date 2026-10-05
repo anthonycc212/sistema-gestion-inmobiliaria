@@ -159,7 +159,6 @@ public class CaracteristicaControllerTests {
 
         Thread.sleep(100);
 
-        // Verificar que ya no existe
         mockMvc.perform(get("/api/caracteristicas/" + guardada.getId()))
                 .andExpect(status().isNotFound());
     }

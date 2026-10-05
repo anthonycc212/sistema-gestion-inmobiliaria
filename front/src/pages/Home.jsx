@@ -21,7 +21,6 @@ export default function Home() {
   const [featured, setFeatured] = useState([]);
   const bgRef = useRef(null);
 
-  // Search state
   const [distritos, setDistritos] = useState(DEFAULT_DISTRITOS);
   const [search, setSearch] = useState({
     operacion: "",

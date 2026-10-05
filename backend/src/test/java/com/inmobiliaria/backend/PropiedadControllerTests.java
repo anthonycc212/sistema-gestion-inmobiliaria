@@ -190,7 +190,6 @@ public class PropiedadControllerTests {
         String json = result.getResponse().getContentAsString();
         Integer propiedadId = objectMapper.readTree(json).get("id").asInt();
 
-        // Verificar consulta GET pública
         mockMvc.perform(get("/api/propiedades/" + propiedadId))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.titulo").value("Departamento Moderno en Miraflores"));
@@ -382,7 +381,6 @@ public class PropiedadControllerTests {
 
         Integer propId = objectMapper.readTree(createResult.getResponse().getContentAsString()).get("id").asInt();
 
-        // ADMIN desactiva lógicamente
         mockMvc.perform(delete("/api/propiedades/" + propId)
                         .header("Authorization", "Bearer " + tokenAdmin))
                 .andExpect(status().isNoContent());

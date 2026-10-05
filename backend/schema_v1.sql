@@ -1,10 +1,9 @@
 -- =============================================================================
 -- PROYECTO: SISTEMA DE GESTIÓN INMOBILIARIA
--- ENTREGABLE 1: SEMANA 6 - SESIÓN 11
 -- ARCHIVO: schema_v1.sql
 -- MOTOR: MySQL 8.0+ (InnoDB, utf8mb4)
 -- NORMALIZACIÓN: 3FN (Tercera Forma Normal)
--- TOTAL TABLAS: 13 (Modelo Completo Definitivo)
+-- TOTAL TABLAS: 13
 -- =============================================================================
 
 SET FOREIGN_KEY_CHECKS = 0;

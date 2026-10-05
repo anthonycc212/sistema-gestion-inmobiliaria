@@ -1,6 +1,5 @@
 /**
- * propiedadesService.js
- * Capa de servicio conectada a los endpoints REST reales de Propiedades e Imágenes.
+ * Servicio API para gestión de propiedades e imágenes.
  */
 import { apiRequest } from "./apiClient";
 

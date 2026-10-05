@@ -4,16 +4,7 @@ import { useAuth } from "../auth/useAuth";
 import "./Login.css";
 
 /**
- * src/pages/Login.jsx
- *
- * Pantalla de acceso para usuarios internos:
- *   - ADMIN  → /admin/dashboard
- *   - AGENTE → /agente/propiedades
- *
- * El cliente público NO usa esta pantalla.
- *
- * FUTURO: reemplazar iniciarSesion() por fetch a POST /api/auth/login
- * que devuelva un JWT y el rol del usuario.
+ * Pantalla de inicio de sesión para el personal administrativo y agentes.
  */
 export default function Login() {
   const { iniciarSesion } = useAuth();

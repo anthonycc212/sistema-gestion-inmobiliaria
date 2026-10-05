@@ -22,7 +22,7 @@ public class AgenteController {
     }
 
     /**
-     * Endpoint protegido para Agentes (y Admins) para consultar su propio perfil verificado por JWT.
+     * Retorna el perfil del usuario autenticado.
      */
     @GetMapping("/perfil")
     public ResponseEntity<AgenteResponseDTO> obtenerMiPerfil(Authentication authentication) {

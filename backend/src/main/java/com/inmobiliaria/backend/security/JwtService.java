@@ -30,7 +30,7 @@ public class JwtService {
     private long jwtExpiration;
 
     /**
-     * Obtiene la clave de firma HMAC-SHA256 segura (mínimo 256 bits).
+     * Obtiene la clave de firma HMAC-SHA256 para tokens JWT.
      */
     private SecretKey getSigningKey() {
         String key = (secretKey != null && !secretKey.isBlank())

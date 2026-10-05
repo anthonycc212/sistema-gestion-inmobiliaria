@@ -28,11 +28,7 @@ public class AdminController {
     }
 
     /**
-     * Endpoint exclusivo de ADMIN para crear nuevos Agentes:
-     * - Valida los datos y mitiga XSS mediante DTO.
-     * - Comprueba que el email no esté duplicado.
-     * - Hashea la contraseña con BCrypt antes de persistir en MySQL.
-     * - Asigna forzosamente rol = 'AGENTE' (el frontend no puede modificar el rol).
+     * Registra un nuevo agente en el sistema con rol AGENTE.
      */
     @PostMapping("/agentes")
     public ResponseEntity<AgenteResponseDTO> crearAgente(@Valid @RequestBody AgenteCreateDTO dto) {
@@ -46,7 +42,7 @@ public class AdminController {
                 dto.getNombre().trim(),
                 email,
                 passwordEncoder.encode(dto.getPassword()),
-                "AGENTE", // Asignación forzada por regla de negocio
+                "AGENTE",
                 dto.getTelefono(),
                 dto.getCargo()
         );
@@ -57,7 +53,7 @@ public class AdminController {
     }
 
     /**
-     * Endpoint exclusivo de ADMIN para listar todos los usuarios/agentes del sistema.
+     * Lista todos los usuarios registrados en el sistema.
      */
     @GetMapping("/agentes")
     public ResponseEntity<List<AgenteResponseDTO>> listarAgentes() {

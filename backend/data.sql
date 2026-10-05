@@ -1,7 +1,5 @@
 -- =============================================================================
 -- PROYECTO: Sistema de Gestión Inmobiliaria
--- CURSO: Curso Integrador II: Sistemas - UTP (Ciclo 2026 - Agosto)
--- DOCUMENTO: 2.2.2 Script de Datos de Prueba (Seed Data)
 -- ARCHIVO: backend/data.sql
 -- COMPATIBILIDAD: schema_v1.sql (13 Tablas normalizadas en InnoDB / UTF8MB4)
 --
@@ -24,8 +22,7 @@
 -- -----------------------------------------------------------------------------
 -- 1. TABLA: usuarios
 -- Roles válidos: 'ADMIN', 'AGENTE'
--- Password hasheado con BCrypt (Rounds: 10):
--- Hash "$2a$10$fSoXx0TYvKNsaA9htPcusOkK4m.r/53QaywDaaABoTj66moP9CZxe" -> 'admin123'
+-- Contraseña de prueba almacenada como hash BCrypt (Rounds: 10)
 -- -----------------------------------------------------------------------------
 INSERT INTO usuarios (id, nombre, email, password_hash, rol, telefono, cargo, foto_url, estado) VALUES
 (1, 'Luis Administrador', 'admin@inmobiliaria.com', '$2a$10$fSoXx0TYvKNsaA9htPcusOkK4m.r/53QaywDaaABoTj66moP9CZxe', 'ADMIN', '+51 999 888 777', 'Administrador General', 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&q=80', 'Activo'),

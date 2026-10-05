@@ -37,16 +37,12 @@ public class AuthController {
     }
 
     /**
-     * Endpoint de inicio de sesión:
-     * 1. Recibe DTO validado con email y password.
-     * 2. Autentica mediante Spring Security y BCrypt.
-     * 3. Genera y retorna el token JWT con los datos de sesión.
+     * Autentica credenciales y emite el token JWT de sesión.
      */
     @PostMapping("/login")
     public ResponseEntity<AuthResponseDTO> login(@Valid @RequestBody LoginRequestDTO request) {
         String email = request.getEmail().trim().toLowerCase();
 
-        // Autenticación delegada a Spring Security (valida credenciales contra BCrypt)
         Authentication auth = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(email, request.getPassword())
         );
@@ -62,11 +58,9 @@ public class AuthController {
             throw new BadCredentialsException("El usuario se encuentra inactivo");
         }
 
-        // Actualizar último login
         usuario.setUltimoLogin(LocalDateTime.now());
         usuarioRepository.save(usuario);
 
-        // Generar JWT firmado
         String token = jwtService.generateToken(usuario);
 
         return ResponseEntity.ok(new AuthResponseDTO(

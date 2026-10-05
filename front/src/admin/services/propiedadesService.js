@@ -1,5 +1,4 @@
 /**
- * propiedadesService.js (admin)
- * Re-exporta los métodos conectados a la API real del backend.
+ * Re-exporta el servicio de propiedades para el módulo admin.
  */
 export * from "../../services/propiedadesService";

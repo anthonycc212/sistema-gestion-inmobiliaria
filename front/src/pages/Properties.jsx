@@ -24,7 +24,7 @@ export default function Properties() {
   const [dbProperties, setDbProperties] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // Carga de propiedades desde la API REST
+  // Carga de propiedades
   useEffect(() => {
     let isMounted = true;
     setLoading(true);

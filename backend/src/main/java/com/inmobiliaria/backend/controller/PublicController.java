@@ -12,7 +12,7 @@ import java.util.Map;
 public class PublicController {
 
     /**
-     * Endpoint público para verificar el estado del servicio inmobiliario sin autenticación.
+     * Health check público del servicio.
      */
     @GetMapping("/status")
     public ResponseEntity<Map<String, Object>> publicStatus() {

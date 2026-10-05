@@ -155,7 +155,6 @@ public class PropiedadService {
                 dto.getActivo() != null ? dto.getActivo() : true
         );
 
-        // Asociar características si existen
         if (dto.getCaracteristicasIds() != null && !dto.getCaracteristicasIds().isEmpty()) {
             List<Caracteristica> caracs = caracteristicaRepository.findAllById(dto.getCaracteristicasIds());
             propiedad.setCaracteristicas(new HashSet<>(caracs));
@@ -163,7 +162,6 @@ public class PropiedadService {
 
         Propiedad guardada = propiedadRepository.save(propiedad);
 
-        // Guardar imágenes si se proporcionaron URLs
         if (dto.getImagenes() != null && !dto.getImagenes().isEmpty()) {
             List<PropiedadImagen> listaImagenes = new ArrayList<>();
             for (int i = 0; i < dto.getImagenes().size(); i++) {
@@ -216,7 +214,6 @@ public class PropiedadService {
             propiedad.setAgente(nuevoAgente);
         }
 
-        // Actualizar características
         if (dto.getCaracteristicasIds() != null) {
             List<Caracteristica> caracs = caracteristicaRepository.findAllById(dto.getCaracteristicasIds());
             propiedad.setCaracteristicas(new HashSet<>(caracs));
@@ -243,7 +240,7 @@ public class PropiedadService {
         Propiedad propiedad = propiedadRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Propiedad no encontrada con ID: " + id));
 
-        // Desactivación lógica según la directiva
+        // Desactivación lógica
         propiedad.setActivo(false);
         propiedad.setEstado("Inactivo");
         propiedadRepository.save(propiedad);

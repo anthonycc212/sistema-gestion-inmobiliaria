@@ -100,7 +100,7 @@ export default function Usuarios() {
       setUsuariosMock(newList);
       setModalOpen(false);
     } else {
-      // Creación real en backend Spring Boot
+      // Registro en la API
       try {
         await createUsuario(form);
         await cargarUsuarios();
